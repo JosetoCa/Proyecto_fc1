@@ -7,8 +7,9 @@ print("Cargando datos. Esto puede tomar unos segundos...")
 datos = pd.read_csv('animacion_difusion.csv')
 
 # Descubrir las dimensiones
-Nx = datos['x'].max() + 1
-Ny = datos['y'].max() + 1
+Nx = 200
+Ny = 200
+L = 0.00005
 tiempos = datos['t'].unique()
 total_frames = len(tiempos)
 

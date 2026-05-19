@@ -91,9 +91,9 @@ int main() {
             for (int j = 0; j < Ny; ++j) {
                 for (int i = 0; i < Nx; ++i) {
                     archivo << t << "," 
-                            << i << "," 
-                            << j << "," 
-                            << sim.obtener_valor(i, j) << "\n";
+                        << i * dx << ","   // Multiplicamos por dx para que sea en metros
+                        << j * dy << ","   // Multiplicamos por dy para que sea en metros
+                        << sim.obtener_valor(i, j) << "\n";
                 }
             }
         }
