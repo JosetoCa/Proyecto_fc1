@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
 
 print("Cargando el censo de partículas. Esto puede tomar un momento...")
-datos = pd.read_csv('animacion_mc.csv')
-
+datos = pd.read_csv('animacion_mc.csv', header=None, names=['t', 'x', 'y'])
+print("Columnas detectadas:", datos.columns.tolist())
 tiempos = datos['t'].unique()
 total_frames = len(tiempos)
 
@@ -32,7 +32,7 @@ matriz_conteo = matriz_conteo.T
 # Dibujamos el primer mapa de calor
 # vmax limita el color máximo. Lo dividimos por 2 para que los colores sigan 
 # siendo brillantes incluso cuando muchas partículas empiecen a fugarse.
-cax = ax.imshow(matriz_conteo, cmap='inferno', origin='lower', extent=[0, L, 0, L], vmin=0, vmax=np.max(matriz_conteo)/60)
+cax = ax.imshow(matriz_conteo, cmap='inferno', origin='lower', extent=[0, L, 0, L], vmin=0, vmax=3*np.max(matriz_conteo)/4)
 fig.colorbar(cax, label='Densidad de Partículas (Temperatura)')
 titulo = ax.set_title(f'Paso temporal: {tiempos[0]} (Frame 0/{total_frames-1})')
 ax.set_xlabel('Eje X (metros)')

@@ -22,7 +22,7 @@ frame_inicial = datos[datos['t'] == tiempos[0]]
 matriz = frame_inicial['temperatura'].values.reshape((Ny, Nx))
 
 # Dibujar la imagen inicial
-cax = ax.imshow(matriz, cmap='inferno', origin='lower', vmin=0, vmax=20)
+cax = ax.imshow(matriz, cmap='inferno', origin='lower', vmin=0)
 fig.colorbar(cax, label='Temperatura')
 titulo = ax.set_title(f'Paso temporal: {tiempos[0]} (Frame 0/{total_frames-1})')
 

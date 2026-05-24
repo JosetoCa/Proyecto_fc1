@@ -3,87 +3,50 @@
 #include <vector>
 #include <random>
 #include <cmath>
+#define M_PI 3.14159265358979323846
+// #define CONDICION_AJEDREZ 
+#define CONDICION_DONA
 
-// 1. Estructura de la partícula
-struct Particula {
-    double x;
-    double y;
-    bool activa; // Etiqueta de vida para condiciones de Dirichlet
-};
+struct Particula { double x, y; bool activa; };
 
 int main() {
-    // --- PARÁMETROS FÍSICOS (Sincronizados con Diferencias Finitas) ---
-    const double L = 0.00005; 
-    const double D = 1e-17;   
-    const int Nx = 200; // Solo para calcular el mismo dt base
-
-    // Cálculo estricto del tiempo
-    const double dx = L / (Nx - 1);
-    const double dt_max = 1.0 / (4.0 * D * (1.0/(dx*dx))); 
-    const double dt = dt_max * 0.9; 
-
-    const int pasos_temporales = 2000; 
-    const int num_particulas = 100000; 
-
-    // --- LA NUEVA FÍSICA: DESVIACIÓN ESTÁNDAR ---
-    // En lugar de una distancia fija, calculamos el ancho de la campana de Gauss
-    // que dicta qué tan lejos salta una partícula en promedio en un tiempo dt.
-    double sigma = std::sqrt(2.0 * D * dt);
-
-    // --- INICIALIZACIÓN ---
-    std::vector<Particula> enjambre(num_particulas);
-    for (int i = 0; i < num_particulas; ++i) {
-        enjambre[i].x = L / 2.0;
-        enjambre[i].y = L / 2.0;
-        enjambre[i].activa = true; 
-    }
-
-    // --- MOTORES DE ESTADÍSTICA AVANZADA ---
-    std::random_device rd; 
-    std::mt19937 generador(rd());
+    const double L = 0.00005, D = 1e-17;
+    const double dt = 1.0 / (4.0 * D * (1.0/pow(L/199.0, 2))) * 0.9;
+    const int num_particulas = 100000;
     
-    // Distribución Normal (Gaussiana) centrada en 0.0, con desviación 'sigma'
-    std::normal_distribution<double> distribucion_gaussiana(0.0, sigma); 
+    std::random_device rd;
+    std::mt19937 generador(rd());
+    std::uniform_real_distribution<double> dist_espacio(0.0, L);
+    std::uniform_real_distribution<double> dist_prob(0.0, 1.0);
+    std::normal_distribution<double> gauss(0.0, std::sqrt(2.0 * D * dt));
 
-    // --- CONFIGURACIÓN DE SALIDA ---
-    std::ofstream archivo("animacion_mc.csv");
-    archivo << "t,x,y\n";
-    const int guardar_cada = 20; 
-
-    std::cout << "Iniciando simulacion Monte Carlo Gaussiano...\n";
-
-    // --- BUCLE PRINCIPAL DE LA SIMULACIÓN ---
-    for (int t = 0; t < pasos_temporales; ++t) {
+    std::vector<Particula> enjambre(num_particulas);
+    int i = 0;
+    while(i < num_particulas) {
+        double x_c = dist_espacio(generador), y_c = dist_espacio(generador);
+        double prob = 0.0;
         
-        for (int p = 0; p < num_particulas; ++p) {
-            
-            if (!enjambre[p].activa) continue; 
-            
-            // --- EL NUEVO SALTO CONTINUO ---
-            // Extraemos dos números aleatorios de la campana de Gauss
-            // Esto permite que la partícula patine libremente en diagonal, círculos, etc.
-            enjambre[p].x += distribucion_gaussiana(generador);
-            enjambre[p].y += distribucion_gaussiana(generador);
-
-            // --- CONDICIÓN DE FRONTERA DE DIRICHLET ---
-            if (enjambre[p].x >= L || enjambre[p].x <= 0.0 ||
-                enjambre[p].y >= L || enjambre[p].y <= 0.0) {
-                
-                enjambre[p].activa = false; // Muere al tocar los bordes
-            }
-        }
-
-        // Guardar estado
-        if (t % guardar_cada == 0) {
-            for (int p = 0; p < num_particulas; ++p) {
-                if (enjambre[p].activa) {
-                    archivo << t << "," << enjambre[p].x << "," << enjambre[p].y << "\n";
-                }
-            }
-        }
+#ifdef CONDICION_AJEDREZ
+        double freq = 3.0 * M_PI / L;
+        prob = std::pow(std::sin(freq * x_c) * std::sin(freq * y_c), 2);
+#elif defined(CONDICION_DONA)
+        double r = std::sqrt(std::pow(x_c - L/2.0, 2) + std::pow(y_c - L/2.0, 2));
+        prob = std::exp(-std::pow(r - 0.25*L, 2) / (2.0 * std::pow(0.08*L, 2)));
+#endif
+        if(dist_prob(generador) < prob) { enjambre[i++] = {x_c, y_c, true}; }
     }
 
-    archivo.close();
-    std::cout << "Simulacion terminada. Datos exportados.\n";
+    std::ofstream archivo("animacion_mc.csv");
+    for (int t = 0; t < 2000; ++t) {
+        for (int p = 0; p < num_particulas; ++p) {
+            if (!enjambre[p].activa) continue;
+            enjambre[p].x += gauss(generador);
+            enjambre[p].y += gauss(generador);
+            if (enjambre[p].x >= L || enjambre[p].x <= 0.0 || enjambre[p].y >= L || enjambre[p].y <= 0.0)
+                enjambre[p].activa = false;
+        }
+        if (t % 20 == 0)
+            for (auto& p : enjambre) if (p.activa) archivo << t << "," << p.x << "," << p.y << "\n";
+    }
     return 0;
 }

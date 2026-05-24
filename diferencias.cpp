@@ -2,6 +2,7 @@
 #include <iostream>
 #include <utility>
 #include <fstream>
+#include <cmath>
 
 class SimuladorDifusion2D {
 private:
@@ -66,9 +67,25 @@ int main() {
 
     SimuladorDifusion2D sim(Nx, Ny, Lx, Ly, D, dt);
 
-    int centro_x = Nx / 2;
-    int centro_y = Ny / 2;
-    sim.establecer_condicion_inicial(centro_x, centro_y, 10000.0);
+    // --- NUEVA CONDICIÓN INICIAL: PATRÓN DE INTERFERENCIA ---
+    // Ajustamos la frecuencia para que exactamente 3 ciclos quepan en la longitud L
+    double r0 = 0.25 * Lx;
+    double sigma = 0.08 * Lx;
+    double centro_x = Lx / 2.0;
+    double centro_y = Ly / 2.0;
+
+    for (int j = 0; j < Ny; ++j) {
+        for (int i = 0; i < Nx; ++i) {
+            double x = i * dx;
+            double y = j * dy;
+            double r = std::sqrt(std::pow(x - centro_x, 2) + std::pow(y - centro_y, 2));
+            double val = std::exp(-std::pow(r - r0, 2) / (2.0 * std::pow(sigma, 2)));
+            sim.establecer_condicion_inicial(i, j, val * 10000.0);
+        }
+    }
+        // int centro_x = Nx / 2;
+    // int centro_y = Ny / 2;
+    // sim.establecer_condicion_inicial(centro_x, centro_y, 10000.0);
 
     // --- CONFIGURACIÓN DE LA ANIMACIÓN ---
     std::ofstream archivo("animacion_difusion.csv");
