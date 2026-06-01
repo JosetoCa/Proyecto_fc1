@@ -354,17 +354,21 @@ def entrenar_pinn(epocas=20000):
         radio_medio = 0.25
         grosor = 0.08
 
-        r = torch.sqrt(
-            (x_ini - 0.5)**2
-            +
-            (y_ini - 0.5)**2
-        )
+        # r = torch.sqrt(
+        #     (x_ini - 0.5)**2
+        #     +
+        #     (y_ini - 0.5)**2
+        # )
 
-        u_ini_real = torch.exp(
-            -((r - radio_medio)**2)
-            /
-            (2 * grosor**2)
-        )
+        # u_ini_real = torch.exp(
+        #     -((r - radio_medio)**2)
+        #     /
+        #     (2 * grosor**2)
+        # )
+
+        freq_x = 3.0 * torch.pi
+        freq_y = 3.0 * torch.pi
+        u_ini_real = (torch.sin(freq_x * x_ini) * torch.sin(freq_y * y_ini))**2
 
         loss_ic = torch.mean(
             (u_ini_pred - u_ini_real)**2
@@ -400,7 +404,7 @@ def entrenar_pinn(epocas=20000):
 # ENTRENAMIENTO
 # ============================================================
 
-entrenar_pinn(20000)
+entrenar_pinn(2000)
 
 # ============================================================
 # GUARDAR PESOS
@@ -408,7 +412,7 @@ entrenar_pinn(20000)
 
 torch.save(
     modelo.state_dict(),
-    "pinn_siren_difusion.pth"
+    "pinn_siren_chess.pth"
 )
 
 print("Entrenamiento finalizado.")

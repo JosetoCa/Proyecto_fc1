@@ -63,9 +63,9 @@ modelo = PINN_Difusion_SIREN().to(device)
 
 # Carga de pesos estricta
 try:
-    modelo.load_state_dict(torch.load("pinn_siren_difusion.pth", map_location=device, weights_only=True))
+    modelo.load_state_dict(torch.load("pinn_siren_chess.pth", map_location=device, weights_only=True))
 except FileNotFoundError:
-    print("Error: El archivo 'pinn_siren_difusion.pth' no se encontró en el directorio actual.")
+    print("Error: El archivo 'pinn_siren_chess.pth' no se encontró en el directorio actual.")
     exit(1)
 
 modelo.eval()
