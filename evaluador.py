@@ -23,7 +23,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 modelo = PINN_Difusion().to(device)
 
 # CORRECCIÓN 1: Nombre de archivo y pesos correctos
-modelo.load_state_dict(torch.load('pinn_difusion_normalizada.pth', weights_only=True))
+modelo.load_state_dict(torch.load('pinn_siren_difusion.pth', weights_only=True))
 modelo.eval()
 
 # Parámetros físicos reales para la proyección
